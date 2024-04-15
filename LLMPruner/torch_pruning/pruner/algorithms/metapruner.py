@@ -223,7 +223,7 @@ class MetaPruner:
         return 1  # no channel grouping
     
     def get_consecutive_groups(self, group):
-        if isinstance(self.consecutive_groups, int):
+        if isinstance(self.consecutive_groups, int): 
             return self.consecutive_groups
         for dep, _ in group:
             module = dep.target.module

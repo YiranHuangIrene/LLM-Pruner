@@ -1,0 +1,1 @@
+python /shared-local/aoq609/LLM-Pruner/examples/llava-vicuna_prune.py

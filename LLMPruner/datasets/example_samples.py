@@ -25,7 +25,7 @@ def get_c4(tokenizer, n_samples, seq_len):
 def get_bookcorpus(tokenizer, n_samples, seq_len):
     traindata = load_dataset(
         'bookcorpus', split='train'
-    )
+    )  
     
     tokenized_samples, history = [], []
     for _ in range(n_samples):

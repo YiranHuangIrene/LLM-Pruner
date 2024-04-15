@@ -76,42 +76,17 @@ def main(args):
             )
         s = generation_output.sequences[0]
         output = tokenizer.decode(s)
-        yield output
+        return output
 
-    gr.Interface(
-        fn=evaluate,
-        inputs=[
-            gr.components.Textbox(lines=2, label="Input", placeholder="none"),
-            gr.components.Slider(
-                minimum=0, maximum=1, value=1, label="Temperature"
-            ),
-            gr.components.Slider(
-                minimum=0, maximum=1, value=0.95, label="Top p"
-            ),
-            gr.components.Slider(
-                minimum=0, maximum=100, step=1, value=50, label="Top k"
-            ),
-            gr.components.Slider(
-                minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
-            ),
-            gr.components.Checkbox(label="Stream output"),
-        ],
-        outputs=[
-            gr.inputs.Textbox(
-                lines=5,
-                label="Output",
-            )
-        ],
-        title="Evaluate Pruned Model",
-        description=description,
-    ).queue().launch(server_name="0.0.0.0", share=args.share_gradio)
-
-
+    output_text = evaluate(args.input_text)
+    print(output_text)
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tuning Pruned LLaMA (huggingface version)')
 
     parser.add_argument('--base_model', type=str, default="liuhaotian/llava-v1.5-7b", help='base model name')
     parser.add_argument('--model_type', type=str, default='pruneLLM', help = 'choose from ')
+    parser.add_argument('--input_text', type=str, default='Tell me a funny joke', help = 'Text input for model evaluation')
     parser.add_argument('--ckpt', type=str, default='/shared-local/aoq609/LLM-Pruner/LLMPruner/prune_log/llava-v1.5-7b_0.2/pytorch_model.bin')
     parser.add_argument('--lora_ckpt', type=str, default=None)
     parser.add_argument('--share_gradio', action='store_true')

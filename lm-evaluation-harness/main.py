@@ -1,3 +1,6 @@
+import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2,3,6,7,8"
 import argparse
 import json
 import logging
@@ -27,16 +30,16 @@ class MultiChoice:
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", required=True)
-    parser.add_argument("--model_args", default="")
-    parser.add_argument("--tasks", default=None, choices=MultiChoice(tasks.ALL_TASKS))
+    parser.add_argument("--model", default="hf-causal-experimental")
+    parser.add_argument("--model_args", default="checkpoint=/shared-local/aoq609/LLM-Pruner/LLMPruner/prune_log/llava-v1.5-7b_0.2/pytorch_model.bin,config_pretrained=liuhaotian/llava-v1.5-7b")
+    parser.add_argument("--tasks", default="hellaswag,arc_challenge,piqa", choices=MultiChoice(tasks.ALL_TASKS))
     parser.add_argument("--provide_description", action="store_true")
     parser.add_argument("--num_fewshot", type=int, default=0)
-    parser.add_argument("--batch_size", type=str, default=None)
-    parser.add_argument("--device", type=str, default=None)
-    parser.add_argument("--output_path", default=None)
+    parser.add_argument("--batch_size", type=str, default=4)
+    parser.add_argument("--device", type=str, default='cuda')
+    parser.add_argument("--output_path", default='/shared-local/aoq609/LLM-Pruner/lm-evaluation-harness/results/results_llava-v1.5-7b_0.2.json')
     parser.add_argument("--limit", type=int, default=None)
-    parser.add_argument("--no_cache", action="store_true")
+    parser.add_argument("--no_cache", action="store_false")
     parser.add_argument("--decontamination_ngrams_path", default=None)
     parser.add_argument("--description_dict_path", default=None)
     parser.add_argument("--check_integrity", action="store_true")

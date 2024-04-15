@@ -1,0 +1,1 @@
+python /shared-local/aoq609/LLM-Pruner/hf_prune.py

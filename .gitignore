@@ -13,7 +13,7 @@ ckpt
 *.ipynb
 *.bin
 log.txt
-*_log
+# *_log
 *.log
 
 flagged/

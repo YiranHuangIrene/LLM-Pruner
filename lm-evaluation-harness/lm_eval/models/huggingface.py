@@ -1,4 +1,6 @@
 import math
+import sys
+sys.path.append('/shared-local/aoq609/LLM-Pruner')
 import torch
 import torch.nn.functional as F
 import transformers

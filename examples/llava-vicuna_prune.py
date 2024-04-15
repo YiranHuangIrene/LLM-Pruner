@@ -1,6 +1,7 @@
 import os
 import gc
 import sys
+sys.path.append('/shared-local/aoq609/LLM-Pruner')
 import time
 import json
 import copy
@@ -20,6 +21,9 @@ from LLMPruner.evaluator.ppl import PPLMetric
 from LLMPruner.datasets.example_samples import get_examples
 from LLMPruner.templates.prompts import prompts
 
+from llava.model.builder import load_pretrained_model
+from llava.mm_utils import get_model_name_from_path
+
 def set_random_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
@@ -30,17 +34,19 @@ def main(args):
     set_random_seed(args.seed)
 
     logger = LoggerWithDepth(
-        env_name="{}".format(args.save_ckpt_log_name), 
+        env_name="{}_{}".format(args.base_model.split("/")[-1], args.pruning_ratio), 
         config=args.__dict__,
         root_dir='/shared-local/aoq609/LLM-Pruner/LLMPruner/prune_log',
         setup_sublogger=True
     )
-
-    tokenizer = LlamaTokenizer.from_pretrained(args.base_model)
+    tokenizer, _, _, _ = load_pretrained_model(args.base_model, None, model_name=get_model_name_from_path(args.base_model), device=args.eval_device)
+    
+    # tokenizer = LlamaTokenizer.from_pretrained(args.base_model)
     model = LlamaForCausalLM.from_pretrained(
-        args.base_model,
+        '/shared-local/aoq609/.cache/huggingface/hub/models--liuhaotian--llava-v1.5-7b/snapshots/12e054b30e8e061f423c7264bc97d4248232e965',
         low_cpu_mem_usage=True if args.torch_version >=1.9 else False
     )
+    print(model.config)
     if args.device != "cpu":
         model.half()   # TODO Why half precision
     model.to(args.device)
@@ -272,9 +278,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Pruning LLaMA (huggingface version)')
 
     # argument for parsing
-    parser.add_argument('--base_model', type=str, default="lmsys/vicuna-7b-v1.5", help='base model name, or path to the model weights')
+    parser.add_argument('--base_model', type=str, default="liuhaotian/llava-v1.5-7b", help='base model name, or path to the model weights')
     parser.add_argument('--save_ckpt_log_name', type=str, default="llama_prune", help='the path for save the checkpoint and the log. The final path would be log/{your_name_here}_{pruner_type}_{pruning_ratio}')
-    parser.add_argument('--pruning_ratio', type=float, default=0.25, help='pruning ratio')
+    parser.add_argument('--pruning_ratio', type=float, default=0.6, help='pruning ratio')
     parser.add_argument('--pruner_type', type=str, default='taylor', help='pruner type')
 
     # argument for generation
@@ -300,13 +306,13 @@ if __name__ == "__main__":
     parser.add_argument('--num_examples', type=int, default=10)
 
     # general argument
-    parser.add_argument('--device', type=str, default="cuda", help='device')
+    parser.add_argument('--device', type=str, default="cuda:7", help='device')
     parser.add_argument('--test_before_train', action='store_true', help='whether test before train')
-    parser.add_argument('--eval_device', type=str, default="cuda", help='eval device')
+    parser.add_argument('--eval_device', type=str, default="cuda:7", help='eval device')
     parser.add_argument('--test_after_train', action='store_true', help='whether test after train')
 
     parser.add_argument('--seed', type=int, default=42, help='seed')
-    parser.add_argument('--save_model', action='store_true', help='if save model')
+    parser.add_argument('--save_model', action='store_false', help='if save model')
     args = parser.parse_args()
 
     torch_version = float('.'.join(torch.__version__.split('.')[:2]))
